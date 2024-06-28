@@ -11,6 +11,7 @@ type User struct {
 	Email    string `json:"email"`
 	Phone    string `json:"hp"`
 	Alamats  string
+	Todos    []Todo
 }
 
 type Alamat struct {
