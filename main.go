@@ -2,9 +2,9 @@ package main
 
 import (
 	"apibe23/configs"
-	"apibe23/internal/controllers/todos"
-	"apibe23/internal/controllers/users"
-	"apibe23/internal/models"
+	"apibe23/internal/features/users/handler"
+	"apibe23/internal/features/users/repository"
+	"apibe23/internal/features/users/services"
 
 	"github.com/golang-jwt/jwt/v5"
 	echojwt "github.com/labstack/echo-jwt/v4"
@@ -23,16 +23,17 @@ func main() {
 
 	cfg := configs.ImportSetting()
 	db, _ := configs.ConnectDB(cfg)
-	db.AutoMigrate(&models.User{}, &models.Todo{})
-	um := models.NewUserModel(db)
-	uc := users.NewUserController(um)
+	db.AutoMigrate(&repository.User{})
+	um := repository.NewUserModel(db)
+	us := services.NewUserService(um)
+	uc := handler.NewUserController(us)
 
-	tm := models.NewTodoModel(db)
-	tc := todos.NewTodoController(tm)
+	// tm := models.NewTodoModel(db)
+	// tc := todos.NewTodoController(tm)
 
 	// Register
-	e.POST("/users", uc.Register)
-	e.POST("/login", uc.Login)
+	e.POST("/users", uc.Register())
+	e.POST("/login", uc.Login())
 
 	t := e.Group("/todos")
 	t.Use(echojwt.WithConfig(
@@ -41,8 +42,8 @@ func main() {
 			SigningMethod: jwt.SigningMethodHS256.Name,
 		},
 	))
-	t.GET("", tc.ShowMyTodo())
-	t.POST("", tc.CreateTodo())
+	// t.GET("", tc.ShowMyTodo())
+	// t.POST("", tc.CreateTodo())
 
 	e.GET("/hello", func(c echo.Context) error {
 		return c.JSON(200, "hello world")

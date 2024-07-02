@@ -1,6 +1,8 @@
-package users
+package handler
 
-import "apibe23/internal/models"
+import (
+	"apibe23/internal/features/users"
+)
 
 type LoginRequest struct {
 	Email    string `json:"email"`
@@ -19,8 +21,8 @@ type AlamatRequest struct {
 	Alamat string `json:"alamat"`
 }
 
-func ToModelUsers(r RegisterRequest) models.User {
-	return models.User{
+func ToModelUsers(r RegisterRequest) users.User {
+	return users.User{
 		Name:     r.Name,
 		Password: r.Password,
 		Email:    r.Email,
