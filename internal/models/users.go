@@ -30,9 +30,9 @@ func NewUserModel(connection *gorm.DB) *UserModel {
 	}
 }
 
-func (um *UserModel) Login(email string, password string) (User, error) {
+func (um *UserModel) Login(email string) (User, error) {
 	var result User
-	err := um.db.Where("email = ? AND password = ?", email, password).First(&result).Error
+	err := um.db.Where("email = ?", email).First(&result).Error
 	if err != nil {
 		return User{}, err
 	}

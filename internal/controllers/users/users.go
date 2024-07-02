@@ -26,6 +26,15 @@ func (uc *UserController) Register(c echo.Context) error {
 	if err != nil {
 		return c.JSON(400, helper.ResponseFormat(400, "input error", nil))
 	}
+
+	processPw, err := utils.GeneratePassword(input.Password)
+
+	if err != nil {
+		return c.JSON(400, helper.ResponseFormat(400, "input error", nil))
+	}
+
+	input.Password = string(processPw)
+
 	_, err = uc.model.Register(ToModelUsers(input))
 	if err != nil {
 		return c.JSON(500, helper.ResponseFormat(500, "server error", nil))
@@ -40,13 +49,18 @@ func (uc *UserController) Login(c echo.Context) error {
 		return c.JSON(400, helper.ResponseFormat(400, "input error", nil))
 	}
 
-	result, err := uc.model.Login(input.Email, input.Password)
+	result, err := uc.model.Login(input.Email)
 	if err != nil {
 		return c.JSON(500, helper.ResponseFormat(500, "server error", nil))
 	}
 
-	token, err := utils.GenerateToken(result.ID)
+	err = utils.CheckPassword([]byte(input.Password), []byte(result.Password))
 
+	if err != nil {
+		return c.JSON(400, helper.ResponseFormat(400, "input data kurang tepat", nil))
+	}
+
+	token, err := utils.GenerateToken(result.ID)
 	if err != nil {
 		return c.JSON(500, helper.ResponseFormat(500, "privacy error", nil))
 	}
