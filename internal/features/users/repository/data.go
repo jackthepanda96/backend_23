@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"apibe23/internal/features/todos/repository"
 	"apibe23/internal/features/users"
 
 	"gorm.io/gorm"
@@ -13,7 +14,7 @@ type User struct {
 	Email    string `json:"email"`
 	Phone    string `json:"hp"`
 	// Alamats  string
-	// Todos    []Todo
+	Todos []repository.Todo `gorm:"foreignKey:owner"`
 }
 
 func (u *User) toUserEntity() users.User {
