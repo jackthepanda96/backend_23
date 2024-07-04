@@ -7,6 +7,7 @@ import (
 	"apibe23/internal/features/users/repository"
 	"apibe23/internal/features/users/services"
 	"apibe23/internal/routes"
+	"apibe23/internal/utils"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -16,8 +17,9 @@ func InitFactory(e *echo.Echo) {
 	cfg := configs.ImportSetting()
 	db, _ := configs.ConnectDB(cfg)
 	db.AutoMigrate(&repository.User{}, &repoTodo.Todo{})
+	pu := utils.NewPasswordUtility()
 	um := repository.NewUserModel(db)
-	us := services.NewUserService(um)
+	us := services.NewUserService(um, pu)
 	uc := handler.NewUserController(us)
 
 	e.Pre(middleware.RemoveTrailingSlash())

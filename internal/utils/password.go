@@ -2,7 +2,17 @@ package utils
 
 import "golang.org/x/crypto/bcrypt"
 
-func GeneratePassword(currentPw string) ([]byte, error) {
+type PasswordUtilityInterface interface {
+	GeneratePassword(currentPw string) ([]byte, error)
+	CheckPassword(inputPw []byte, currentPw []byte) error
+}
+type passwordUtility struct{}
+
+func NewPasswordUtility() PasswordUtilityInterface {
+	return &passwordUtility{}
+}
+
+func (pw *passwordUtility) GeneratePassword(currentPw string) ([]byte, error) {
 	result, err := bcrypt.GenerateFromPassword([]byte(currentPw), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err
@@ -11,6 +21,6 @@ func GeneratePassword(currentPw string) ([]byte, error) {
 	return result, nil
 }
 
-func CheckPassword(inputPw []byte, currentPw []byte) error {
+func (pw *passwordUtility) CheckPassword(inputPw []byte, currentPw []byte) error {
 	return bcrypt.CompareHashAndPassword(currentPw, inputPw)
 }

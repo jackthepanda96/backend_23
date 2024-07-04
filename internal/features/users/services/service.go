@@ -15,20 +15,22 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserServices struct {
+type userServices struct {
 	qry      users.Query
 	validate *validator.Validate
+	pu       utils.PasswordUtilityInterface
 }
 
-func NewUserService(q users.Query) users.Services {
-	return &UserServices{
+func NewUserService(q users.Query, p utils.PasswordUtilityInterface) users.Services {
+	return &userServices{
 		qry:      q,
 		validate: validator.New(),
+		pu:       p,
 	}
 }
 
-func (us *UserServices) Register(newData users.User) error {
-	processPw, err := utils.GeneratePassword(newData.Password)
+func (us *userServices) Register(newData users.User) error {
+	processPw, err := us.pu.GeneratePassword(newData.Password)
 
 	if err != nil {
 		log.Println("register generate password error:", err.Error())
@@ -47,7 +49,7 @@ func (us *UserServices) Register(newData users.User) error {
 	return nil
 }
 
-func (us *UserServices) Login(email string, password string) (users.User, string, error) {
+func (us *userServices) Login(email string, password string) (users.User, string, error) {
 	err := us.validate.Struct(&users.LoginValidate{Email: email, Password: password})
 	msg := "terjadi kesalahan pada server"
 
@@ -65,7 +67,7 @@ func (us *UserServices) Login(email string, password string) (users.User, string
 		return users.User{}, "", errors.New(msg)
 	}
 
-	err = utils.CheckPassword([]byte(password), []byte(result.Password))
+	err = us.pu.CheckPassword([]byte(password), []byte(result.Password))
 	if err != nil {
 		log.Println("login hash error:", err.Error())
 		if err.Error() == bcrypt.ErrMismatchedHashAndPassword.Error() {
@@ -86,7 +88,7 @@ func (us *UserServices) Login(email string, password string) (users.User, string
 	return result, token, nil
 }
 
-func (us *UserServices) Register2(newUser string, file *multipart.FileHeader) error {
+func (us *userServices) Register2(newUser string, file *multipart.FileHeader) error {
 	// Source
 	src, err := file.Open()
 	if err != nil {
@@ -109,4 +111,4 @@ func (us *UserServices) Register2(newUser string, file *multipart.FileHeader) er
 	return nil
 }
 
-func (us *UserServices) kerjaLogin() {}
+func (us *userServices) kerjaLogin() {}
